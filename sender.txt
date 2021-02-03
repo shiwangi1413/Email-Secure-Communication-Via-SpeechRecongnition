@@ -1,0 +1,78 @@
+#Sender.py
+
+#!/usr/bin/python3
+
+import smtplib
+import speech_recognition as sr
+import re
+from email.message import EmailMessage
+
+listener = sr.Recognizer()
+regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
+
+server = smtplib.SMTP('smtp.gmail.com',587)
+server.starttls()
+server.login('aparna123wadkar@gmail.com', 'projectaccount')
+
+def check_name(string):
+
+        email_list = {'aparna': 'aparna123wadkar@gmail.com', 'shivangi': 'shiwangibammankar1996@gmail.com'}
+        for key in email_list:
+                if(key == string):
+                        email_id = email_list.get(key)
+                        print(email_id)
+                        verify = check(email_id)
+                        print(verify)
+                        print('Subject:')
+                        subject = get_info()
+                        print('What message you want to send')
+                        msg = get_info()
+                        send_email(email_id, subject, msg)
+						 break
+                else:
+                        print('Invalid Name!!')
+
+
+def check(email_id):
+
+        if(re.search(regex,email_id)):
+                vfy = 'Valid Email'
+                return(vfy)
+
+        else:
+                print('Invalid Email')
+
+def get_info():
+
+        try:
+                with sr.Microphone(sample_rate=44100) as source:
+                        print('listening....')
+                        voice = listener.listen(source)
+                        info = listener.recognize_google(voice)
+                        print(info)
+                        return info.lower()
+        except:
+                pass
+
+def send_email(email_id, subject, msg):
+
+        email = EmailMessage()
+        email['From'] = 'aparna123wadkar@gmail.com'
+        email['To'] = email_id
+        email['Subject'] = subject
+        email.set_content(msg)
+        server.send_message(email)
+        print("Message Sent")
+
+def get_email_info():
+        print("="*100)
+        get_info()
+        print("="*100)
+        print("="*25 + "EMAIL SECURE COMMUNICATION VIA SPEECH-RECOGNITION!!" + "="*25)
+        print('To whom you want to send email')
+        string = get_info()
+        print('verifying....')
+        check_name(string)
+
+get_email_info()
+

@@ -1,0 +1,105 @@
+#receiver.py
+
+#!/usr/bin/python3
+
+import imaplib
+import email
+from email.header import decode_header
+import  os
+import speech_recognition as sr
+from email.message import EmailMessage
+import stdiomask
+
+listener = sr.Recognizer()
+
+def get_info():
+        try:
+                with sr.Microphone() as source:
+                        print('listening....')
+                        voice = listener.listen(source)
+                        info = listener.recognize_google(voice)
+                        print(info)
+                        return info.lower()
+        except:
+                pass
+
+
+imap = imaplib.IMAP4_SSL("imap.gmail.com", 993)
+
+
+def recv_email(receiver, user, password):
+		imap.login(user, password)
+        status, messages = imap.select('Inbox')
+        N = 8
+        messages = int(messages[0])
+        for i in range(messages, messages-N, -1):
+                res, msg = imap.fetch(str(i), "(RFC822)")
+                for response in msg:
+                        if isinstance(response, tuple):
+                                msg = email.message_from_bytes(response[1])
+
+                                # SUBJECT
+                                subject, encoding = decode_header(msg["Subject"])[0]
+                                if isinstance(subject, bytes):
+									subject = subject.decode(encoding)
+
+                                # FROM
+                                From, encoding = decode_header(msg["From"])[0]
+                                if isinstance(From, bytes):
+                                        From = From.decode(encoding)
+
+                                #Print Subject and From
+                                print("Subject:", subject)
+                                print("From:", From)
+
+                                #BODY
+                                if msg.is_multipart():
+									 for part in msg.walk():
+                                                content_type = part.get_content_type()
+                                                content_disposition = str(part.get("Content-Disposition"))
+                                                try:
+                                                        body = part.get_payload(decode=True).decode()
+                                                except:
+                                                        pass
+
+
+                                                if content_type == "text/plain" and "attachment" not in content_dispositi$
+                                                        print(body)
+														
+												elif "attachment" in content_disposition:
+                                                        filename = part.get_filename()
+                                                        print(filename)
+														if filename.endswith((".bat.txt", ".bat.pdf", ".bat.doc",".bat")) or filename.endswith((".she.txt", ".she.pdf", ".she.doc", ".she")):
+															print('This file is vulnerable.')
+								
+								# CASES
+                                else:
+                                        content_type = msg.get_content_type()
+                                        body = msg.get_payload(decode=True).decode()
+                                        if content_type == "text/plain":
+                                                print(body)
+
+                        print("="*100)
+email_list = {'aparna': 'aparna123wadkar@gmail.com','shivangi': 'shiwangibammankar1996@gmail.com'}
+
+def get_email_info():
+        get_info()
+        print('='*100)
+        print("="*100)
+        print("="*25 + "EMAIL SECURE COMMUNICATION VIA SPEECH RECOGNITION" + "="*25)
+        print('Login name of the user ')
+        receiver = get_info()
+        user = email_list[receiver]
+        print(user)
+        print('Type the password for given user: ')
+        password = stdiomask.getpass(mask='*')
+        print('HERE ARE THE DETAILS')
+        recv_email(receiver, user, password)
+        imap.close()
+        imap.logout()
+
+get_email_info()
+
+
+
+
